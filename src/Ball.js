@@ -1,6 +1,6 @@
 //import liraries
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Animated, StyleSheet } from 'react-native';
 
 // create a component
 class Ball extends Component {
@@ -8,9 +8,20 @@ class Ball extends Component {
     //     super(props);
     //     }
 
+
+    componentWillMount() {
+        this.position = new Animated.ValueXY(0, 0);
+        Animated.spring(this.position, {
+            toValue: { x: 200, y: 500 },
+        }).start();
+    }
+
+
     render() {
         return (
-            <View style={styles.ball} />
+            <Animated.View style={this.position.getLayout()}>
+                <View style={styles.ball} />
+            </Animated.View >
         );
     }
 }
