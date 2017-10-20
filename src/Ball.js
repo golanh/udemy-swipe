@@ -1,12 +1,16 @@
 //import liraries
 import React, { Component } from 'react';
-import { View, Animated, StyleSheet } from 'react-native';
+import { View, Animated, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 
 // create a component
 class Ball extends Component {
-    //  constructor(props) {
-    //     super(props);
-    //     }
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            move: false
+        };
+    }
 
 
     componentWillMount() {
@@ -19,9 +23,11 @@ class Ball extends Component {
 
     render() {
         return (
-            <Animated.View style={this.position.getLayout()}>
-                <View style={styles.ball} />
-            </Animated.View >
+            <TouchableWithoutFeedback onPress={this.setState({ move: true })}>
+                <Animated.View style={this.state.move ? this.position.getLayout() : null}>
+                    <View style={styles.ball} />
+                </Animated.View >
+            </TouchableWithoutFeedback>
         );
     }
 }
