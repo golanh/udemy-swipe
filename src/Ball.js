@@ -22,6 +22,7 @@ class Ball extends Component {
 
 
     render() {
+        console.log('ball');
         return (
             <TouchableWithoutFeedback onPress={this.setState({ move: true })}>
                 <Animated.View style={this.state.move ? this.position.getLayout() : null}>
