@@ -47,42 +47,57 @@ class Deck extends Component {
         };
     }
 
-    componentWillUpdate(nextProps, nextState) {
+    componentWillReceiveProps(nextProps) {
+        //reset deck index when new data arrived
+        if (nextProps.data !== this.props.data) {
+            this.setState({ index: 0 });
+        }
+    }
+
+    componentWillUpdate() {
         UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
         LayoutAnimation.spring();
     }
-    
 
-    forceSwipe(direction) {
-        const x = direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
+    forceSwipe(direction) { // direction: direction of swipe === 'right'/'left'
+        const newX = direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
 
+        //swipe out configuration
         Animated.timing(this.position, {
-            toValue: { x, y: 0 },
+            toValue: { x: newX, y: 0 },
             duration: SWIPE_OUT_DURATION
         }).start(() => this.onSwipeComplete(direction));
     }
 
-    onSwipeComplete(direction) {
+    onSwipeComplete(direction) { // direction: direction of swipe === 'right'/'left'
         const { onSwipeRight, onSwipeLeft, data } = this.props;
         const item = data[this.state.index];
 
+        //execute corresponding prop function
         direction === 'right' ? onSwipeRight(item) : onSwipeLeft(item);
-        this.position.setValue({ x: 0, y: 0 });
+
+        //advance index to display next card
         this.setState({ index: this.state.index + 1 });
+
+        //reset this.position for next card display
+        this.position.setValue({ x: 0, y: 0 });
     }
 
     getCardStyle() {
+        //rotation configuration
         const rotate = this.position.x.interpolate({
             inputRange: [-SCREEN_WIDTH * 1.5, 0, SCREEN_WIDTH * 1.5],
             outputRange: ['-120deg', '0deg', '120deg']
         });
 
+        //style object returned
         return {
             ...this.position.getLayout(),
             transform: [{ rotate }]
         };
     }
 
+    //reset this.position to starting coordinates
     resetPosition() {
         Animated.spring(this.position, {
             toValue: { x: 0, y: 0 }
@@ -90,15 +105,19 @@ class Deck extends Component {
     }
 
     renderCards() {
-        if (this.state.index >= this.props.data.length) {
+        if (this.state.index >= this.props.data.length) { // JSX to display when list is empty
             return this.props.renderNoMoreCards();
         }
 
         return this.props.data.map((item, index) => { //item === card, index === index of card in array
+            
+            //dont display swiped cards
             if (index < this.state.index) {
                 return null;
             }
+            
             if (index === this.state.index) {
+            //assign swipe gestures to displayed card
                 return (
                     <Animated.View
                         key={item.id}
@@ -109,6 +128,7 @@ class Deck extends Component {
                     </Animated.View>
                 );
             }
+            //stack unswiped cards
             return (
                 <Animated.View key={item.id} style={[styles.cardStyle, { zIndex: index * -1, top: 10 * (index - this.state.index) }]}>
                     {this.props.renderCard(item)}
@@ -131,7 +151,6 @@ const styles = StyleSheet.create({
     cardStyle: {
         position: 'absolute',
         width: SCREEN_WIDTH,
-        // height: Dimensions.get('window').height
     },
 });
 
