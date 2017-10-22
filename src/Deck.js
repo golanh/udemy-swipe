@@ -11,6 +11,7 @@ class Deck extends Component {
     static defaultProps = {
         onSwipeRight: () => { },
         onSwipeLeft: () => { },
+        renderNoMoreCards: () => { },
     }
 
     constructor(props) {
@@ -75,6 +76,11 @@ class Deck extends Component {
     }
 
     renderCards() {
+        if (this.state.index >= this.props.data.length) {
+            return this.props.renderNoMoreCards();
+
+        }
+
         return this.props.data.map((item, index) => { //item === card, index === index of card in array
             if (index < this.state.index) {
                 return null;
@@ -83,15 +89,19 @@ class Deck extends Component {
                 return (
                     <Animated.View
                         key={item.id}
-                        style={this.getCardStyle()}
+                        style={[this.getCardStyle(), styles.cardStyle]}
                         {...this.panResponder.panHandlers}
                     >
                         {this.props.renderCard(item)}
                     </Animated.View>
                 );
             }
-            return this.props.renderCard(item);
-        });
+            return (
+                <View key={item.id} style={[styles.cardStyle, { zIndex: index * -1 }]}>
+                    {this.props.renderCard(item)}
+                </View>
+            );
+        }).reverse();
     }
 
     render() {
@@ -103,15 +113,14 @@ class Deck extends Component {
     }
 }
 
-// // define your styles
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         backgroundColor: '#2c3e50',
-//     },
-// });
+// define your styles
+const styles = StyleSheet.create({
+    cardStyle: {
+        position: 'absolute',
+        width: SCREEN_WIDTH,
+        // height: Dimensions.get('window').height
+    },
+});
 
 //make this component available to the app
 export default Deck;

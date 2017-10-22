@@ -33,7 +33,17 @@ export default class App extends React.Component {
           title="View Now"
         />
       </Card>
-    )
+    );
+  }
+
+  renderNoMoreCards() {
+    return (
+      <Card title="All Done">
+        <Text style={{ marginBottom: 10 }}>
+          There's no more content here!
+           </Text>
+      </Card>
+    );
   }
 
   render() {
@@ -44,6 +54,7 @@ export default class App extends React.Component {
         <Deck
           data={DATA}
           renderCard={this.renderCard}
+          renderNoMoreCards={this.renderNoMoreCards}
         />
       </View>
     );
