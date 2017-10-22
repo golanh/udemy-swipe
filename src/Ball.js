@@ -1,16 +1,34 @@
 //import liraries
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Animated, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 
 // create a component
 class Ball extends Component {
-    //  constructor(props) {
-    //     super(props);
-    //     }
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            move: false
+        };
+    }
+
+
+    componentWillMount() {
+        this.position = new Animated.ValueXY(0, 0);
+        Animated.spring(this.position, {
+            toValue: { x: 200, y: 500 },
+        }).start();
+    }
+
 
     render() {
+        console.log('ball');
         return (
-            <View style={styles.ball} />
+            <TouchableWithoutFeedback onPress={this.setState({ move: true })}>
+                <Animated.View style={this.state.move ? this.position.getLayout() : null}>
+                    <View style={styles.ball} />
+                </Animated.View >
+            </TouchableWithoutFeedback>
         );
     }
 }
