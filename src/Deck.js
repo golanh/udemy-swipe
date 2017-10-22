@@ -1,6 +1,14 @@
 //import liraries
 import React, { Component } from 'react';
-import { View, Animated, StyleSheet, PanResponder, Dimensions } from 'react-native';
+import {
+    View,
+    Animated,
+    StyleSheet,
+    PanResponder,
+    Dimensions,
+    LayoutAnimation,
+    UIManager
+} from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
@@ -38,6 +46,12 @@ class Deck extends Component {
             index: 0,
         };
     }
+
+    componentWillUpdate(nextProps, nextState) {
+        UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
+        LayoutAnimation.spring();
+    }
+    
 
     forceSwipe(direction) {
         const x = direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
@@ -78,7 +92,6 @@ class Deck extends Component {
     renderCards() {
         if (this.state.index >= this.props.data.length) {
             return this.props.renderNoMoreCards();
-
         }
 
         return this.props.data.map((item, index) => { //item === card, index === index of card in array
@@ -97,11 +110,11 @@ class Deck extends Component {
                 );
             }
             return (
-                <View key={item.id} style={[styles.cardStyle, { zIndex: index * -1 }]}>
+                <Animated.View key={item.id} style={[styles.cardStyle, { zIndex: index * -1, top: 10 * (index - this.state.index) }]}>
                     {this.props.renderCard(item)}
-                </View>
+                </Animated.View>
             );
-        }).reverse();
+        });
     }
 
     render() {
