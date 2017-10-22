@@ -3,9 +3,16 @@ import React, { Component } from 'react';
 import { View, Animated, StyleSheet, PanResponder, Dimensions } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
+const SWIPE_OUT_DURATION = 250;
 
 // create a component
 class Deck extends Component {
+    static defaultProps = {
+        onSwipeRight: () => { },
+        onSwipeLeft: () => { },
+    }
+
     constructor(props) {
         super(props);
 
@@ -15,11 +22,39 @@ class Deck extends Component {
             onPanResponderMove: (event, gesture) => {
                 this.position.setValue({ x: gesture.dx });
             },
-            onPanResponderRelease: () => {
-                this.resetPosition();
+            onPanResponderRelease: (event, gesture) => {
+                if (gesture.dx > SWIPE_THRESHOLD) {
+                    this.forceSwipe('right');
+                } else if (gesture.dx < -SWIPE_THRESHOLD) {
+                    this.forceSwipe('left');
+                } else {
+                    this.resetPosition();
+                }
             },
         });
-    }  
+
+        this.state = {
+            index: 0,
+        };
+    }
+
+    forceSwipe(direction) {
+        const x = direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
+
+        Animated.timing(this.position, {
+            toValue: { x, y: 0 },
+            duration: SWIPE_OUT_DURATION
+        }).start(() => this.onSwipeComplete(direction));
+    }
+
+    onSwipeComplete(direction) {
+        const { onSwipeRight, onSwipeLeft, data } = this.props;
+        const item = data[this.state.index];
+
+        direction === 'right' ? onSwipeRight(item) : onSwipeLeft(item);
+        this.position.setValue({ x: 0, y: 0 });
+        this.setState({ index: this.state.index + 1 });
+    }
 
     getCardStyle() {
         const rotate = this.position.x.interpolate({
@@ -40,8 +75,11 @@ class Deck extends Component {
     }
 
     renderCards() {
-        return this.props.data.map((item, index) => {
-            if (index === 0) {
+        return this.props.data.map((item, index) => { //item === card, index === index of card in array
+            if (index < this.state.index) {
+                return null;
+            }
+            if (index === this.state.index) {
                 return (
                     <Animated.View
                         key={item.id}
